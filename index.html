@@ -85,7 +85,93 @@
             trees.push(tree);
         }
 
-        
+        function onKeyDown(event) {
+            if (gameOver) return;
+            switch (event.keyCode) {
+                case 38: // up arrow
+                    moveForward = true;
+                    break;
+                case 40: // down arrow
+                    moveBackward = true;
+                    break;
+                case 37: // left arrow
+                    turnLeft = true;
+                    break;
+                case 39: // right arrow
+                    turnRight = true;
+                    break;
+            }
+        }
+
+        function onKeyUp(event) {
+            switch (event.keyCode) {
+                case 38: // up arrow
+                    moveForward = false;
+                    break;
+                case 40: // down arrow
+                    moveBackward = false;
+                    break;
+                case 37: // left arrow
+                    turnLeft = false;
+                    break;
+                case 39: // right arrow
+                    turnRight = false;
+                    break;
+            }
+        }
+
+        function moveBike() {
+            if (moveForward) bike.position.z -= 0.5;
+            if (moveBackward) bike.position.z += 0.2;
+            if (turnLeft) bike.position.x -= 0.2;
+            if (turnRight) bike.position.x += 0.2;
+
+            // Keep bike on the road
+            bike.position.x = Math.max(-5, Math.min(5, bike.position.x));
+        }
+
+        function moveCamera() {
+            camera.position.x = bike.position.x;
+            camera.position.z = bike.position.z + 10;
+            camera.lookAt(bike.position);
+        }
+
+        function checkCollisions() {
+            trees.forEach(tree => {
+                if (bike.position.distanceTo(tree.position) < 1.5) {
+                    gameOver = true;
+                    document.getElementById('info').innerHTML = `Game Over! Score: ${score}. Refresh to restart.`;
+                }
+            });
+        }
+
+        function updateTrees() {
+            trees.forEach(tree => {
+                if (tree.position.z > bike.position.z) {
+                    tree.position.z -= 1000;
+                    tree.position.x = Math.random() * 20 - 10;
+                }
+            });
+        }
+
+        function updateScore() {
+            score++;
+            document.getElementById('info').innerHTML = `Score: ${score}`;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (!gameOver) {
+                moveBike();
+                moveCamera();
+                checkCollisions();
+                updateTrees();
+                updateScore();
+            }
+
+            renderer.render(scene, camera);
+        }
 
         init();
     </script>
