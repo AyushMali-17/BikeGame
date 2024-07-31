@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>3D Bike Game</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #info { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; }
+    </style>
+</head>
+<body>
+    <div id="info">Use arrow keys to control the bike. Avoid trees!</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, bike, road;
+        let moveForward = false, moveBackward = false, turnLeft = false, turnRight = false;
+        let trees = [];
+        let gameOver = false;
+        let score = 0;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 10, 0);
+            scene.add(directionalLight);
+
+            // Create a simple bike model
+            const bikeGeometry = new THREE.BoxGeometry(1, 1, 2);
+            const bikeMaterial = new THREE.MeshPhongMaterial({color: 0xff0000});
+            bike = new THREE.Mesh(bikeGeometry, bikeMaterial);
+            bike.position.y = 0.5;
+            scene.add(bike);
+
+            // Create road
+            const roadGeometry = new THREE.PlaneGeometry(10, 1000);
+            const roadMaterial = new THREE.MeshPhongMaterial({color: 0x333333});
+            road = new THREE.Mesh(roadGeometry, roadMaterial);
+            road.rotation.x = -Math.PI / 2;
+            road.position.z = -500;
+            scene.add(road);
+
+            // Create trees
+            for (let i = 0; i < 50; i++) {
+                createTree();
+            }
+
+            camera.position.set(0, 5, 10);
+            camera.lookAt(bike.position);
+
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+
+            animate();
+        }
+
+        function createTree() {
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+            const trunkMaterial = new THREE.MeshPhongMaterial({color: 0x8B4513});
+            const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+
+            const leavesGeometry = new THREE.ConeGeometry(1, 2, 8);
+            const leavesMaterial = new THREE.MeshPhongMaterial({color: 0x00FF00});
+            const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+            leaves.position.y = 2;
+
+            const tree = new THREE.Group();
+            tree.add(trunk);
+            tree.add(leaves);
+
+            tree.position.x = Math.random() * 20 - 10;
+            tree.position.z = Math.random() * -1000;
+            tree.position.y = 1;
+
+            scene.add(tree);
+            trees.push(tree);
+        }
+
+        
+
+        init();
+    </script>
+</body>
+</html>
